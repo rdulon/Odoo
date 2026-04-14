@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="product_brand_in_product_page"
+              inherit_id="website_sale.product"
+              name="Show brand in product page">
+
+        <xpath expr="//h1" position="after">
+            <t t-if="product.brand_id">
+                <div class="mt-2">
+                    <strong>Marca:</strong>
+                    <a t-att-href="'/shop/marca/%s' % product.brand_id.website_slug"
+                       t-out="product.brand_id.name"/>
+                </div>
+            </t>
+        </xpath>
+
+    </template>
+
+    <template id="product_brand_in_list"
+              inherit_id="website_sale.products_item"
+              name="Show brand in product card">
+
+        <xpath expr="//div[contains(@class, 'o_wsale_product_information')]" position="inside">
+            <t t-if="product.brand_id">
+                <div class="text-muted small">
+                    <a t-att-href="'/shop/marca/%s' % product.brand_id.website_slug"
+                       t-out="product.brand_id.name"/>
+                </div>
+            </t>
+        </xpath>
+
+    </template>
+
+</odoo>

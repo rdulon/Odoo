@@ -11,6 +11,7 @@
         "views/product_brand_views.xml",
         "views/product_template_views.xml",
         "views/website_brand_views.xml",
+        "views/website_product_brand_views.xml",
     ],
     "installable": True,
     "application": False,
