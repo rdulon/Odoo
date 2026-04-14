@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <list string="Brands">
                 <field name="name"/>
+                <field name="website_slug"/>
                 <field name="active"/>
             </list>
         </field>
@@ -19,6 +20,8 @@
                 <sheet>
                     <group>
                         <field name="name"/>
+                        <field name="website_slug"/>
+                        <field name="website_url" readonly="1"/>
                         <field name="active"/>
                         <field name="image_128" widget="image"/>
                     </group>
