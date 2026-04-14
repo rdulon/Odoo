@@ -46,4 +46,42 @@
             </div>
         </t>
     </template>
+
+    <template id="brand_list_page" name="Brand List Page">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="container py-5">
+
+                    <h1 class="mb-4">Marcas</h1>
+
+                    <div class="row g-4">
+                        <t t-foreach="brands" t-as="brand">
+                            <div class="col-6 col-md-3 col-lg-2 text-center">
+
+                                <a t-att-href="'/shop/marca/%s' % brand.website_slug">
+
+                                    <div class="card h-100 p-3">
+
+                                        <t t-if="brand.image_128">
+                                            <img t-att-src="'/web/image/product.brand/%s/image_128' % brand.id"
+                                                class="img-fluid mb-2"
+                                                t-att-alt="brand.name"/>
+                                        </t>
+
+                                        <div>
+                                            <strong t-out="brand.name"/>
+                                        </div>
+
+                                    </div>
+
+                                </a>
+
+                            </div>
+                        </t>
+                    </div>
+
+                </section>
+            </div>
+        </t>
+    </template>
 </odoo>
