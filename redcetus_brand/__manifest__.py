@@ -5,11 +5,12 @@
     "category": "Product",
     "author": "RedCetus",
     "license": "LGPL-3",
-    "depends": ["product"],
+    "depends": ["product", "website_sale"],
     "data": [
         "security/ir.model.access.csv",
         "views/product_brand_views.xml",
         "views/product_template_views.xml",
+        "views/website_brand_views.xml",
     ],
     "installable": True,
     "application": False,

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="brand_product_listing" name="Brand Product Listing">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="container py-4">
+                    <div class="mb-4">
+                        <h1 t-out="brand.name"/>
+                        <t t-if="brand.description">
+                            <div t-field="brand.description"/>
+                        </t>
+                    </div>
+
+                    <t t-if="products">
+                        <div class="row g-3">
+                            <t t-foreach="products" t-as="product">
+                                <div class="col-12 col-sm-6 col-lg-3">
+                                    <div class="card h-100">
+                                        <a t-att-href="product.website_url">
+                                            <img t-if="product.image_512"
+                                                 t-att-src="'/web/image/product.template/%s/image_512' % product.id"
+                                                 class="card-img-top img-fluid"
+                                                 t-att-alt="product.name"/>
+                                        </a>
+                                        <div class="card-body">
+                                            <h6 class="card-title mb-2">
+                                                <a t-att-href="product.website_url" t-out="product.name"/>
+                                            </h6>
+                                            <div t-if="product.list_price">
+                                                <span t-out="product.currency_id.symbol"/>
+                                                <span t-out="product.list_price"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+
+                    <t t-else="">
+                        <div class="alert alert-info">
+                            No products are published for this brand.
+                        </div>
+                    </t>
+                </section>
+            </div>
+        </t>
+    </template>
+</odoo>
