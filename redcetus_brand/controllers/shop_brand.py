@@ -46,7 +46,8 @@ class WebsiteSaleBrand(http.Controller):
     )
     def shop_brands(self, **kwargs):
         brands = request.env["product.brand"].sudo().search(
-            [("active", "=", True)],
+            [("active", "=", True),
+             ("product_ids.is_published", "=", True),],
             order="name asc",
         )
 
