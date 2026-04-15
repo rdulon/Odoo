@@ -29,28 +29,28 @@ class WebsiteSaleBrand(http.Controller):
             order="name asc",
         )
 
-        values = {
-            "brand": brand,
-            "products": products,
-        }
-
-        return request.render("redcetus_brand.brand_product_listing", values)
-
-        @http.route(
-            ["/shop/marcas"],
-            type="http",
-            auth="public",
-            website=True,
-            sitemap=True,
+        return request.render(
+            "redcetus_brand.brand_product_listing",
+            {
+                "brand": brand,
+                "products": products,
+            },
         )
-        def shop_brands(self, **kwargs):
 
-            brands = request.env["product.brand"].sudo().search(
-                [("active", "=", True)],
-                order="name asc",
-            )
+    @http.route(
+        ["/shop/marcas"],
+        type="http",
+        auth="public",
+        website=True,
+        sitemap=True,
+    )
+    def shop_brands(self, **kwargs):
+        brands = request.env["product.brand"].sudo().search(
+            [("active", "=", True)],
+            order="name asc",
+        )
 
-            return request.render(
-                "redcetus_brand.brand_list_page",
-                {"brands": brands},
-            )
+        return request.render(
+            "redcetus_brand.brand_list_page",
+            {"brands": brands},
+        )
