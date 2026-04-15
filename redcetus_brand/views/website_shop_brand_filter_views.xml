@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="shop_brand_filter"
+              inherit_id="website_sale.products_attributes_collapsible"
+              name="Shop sidebar brand filter">
+
+        <xpath expr="//*[contains(@class, 'accordion-item')][last()]" position="after">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="brand_filter_heading">
+                    <button class="accordion-button collapsed" type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#brand_filter_collapse"
+                            aria-expanded="false"
+                            aria-controls="brand_filter_collapse">
+                        Marca
+                    </button>
+                </h2>
+
+                <div id="brand_filter_collapse"
+                     class="accordion-collapse collapse"
+                     aria-labelledby="brand_filter_heading">
+                    <div class="accordion-body">
+                        <t t-set="brands"
+                           t-value="request.env['product.brand'].sudo().search([
+                               ('active', '=', True),
+                               ('product_ids.is_published', '=', True),
+                               ('product_ids.sale_ok', '=', True)
+                           ], order='name asc')"/>
+
+                        <t t-if="brands">
+                            <ul class="list-unstyled mb-0">
+                                <t t-foreach="brands" t-as="brand">
+                                    <li class="mb-1">
+                                        <a t-att-href="'/shop/marca/%s' % brand.website_slug"
+                                           t-out="brand.name"/>
+                                    </li>
+                                </t>
+                            </ul>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+
+    </template>
+
+</odoo>
