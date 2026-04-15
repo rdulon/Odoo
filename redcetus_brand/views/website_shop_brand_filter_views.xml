@@ -17,7 +17,6 @@
                         <b>Marca</b>
                     </button>
                 </div>
-
                 <div id="o_products_brands"
                      class="accordion-collapse collapse"
                      data-bs-parent="wsale_products_attributes_collapse">
