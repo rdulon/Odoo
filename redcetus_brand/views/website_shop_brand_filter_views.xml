@@ -21,12 +21,15 @@
                      class="accordion-collapse collapse"
                      data-bs-parent="wsale_products_attributes_collapse">
                     <div class="accordion-body px-0">
+
+                        <t t-set="brand_domain"
+                            t-value="[('active', '=', True),
+                                      ('product_ids.is_published', '=', True),
+                                      ('product_ids.sale_ok', '=', True)] +
+                                      (category and [('product_ids.public_categ_ids', 'child_of', category.id)] or [])"/>
+
                         <t t-set="brands"
-                           t-value="request.env['product.brand'].sudo().search([
-                               ('active', '=', True),
-                               ('product_ids.is_published', '=', True),
-                               ('product_ids.sale_ok', '=', True)
-                           ], order='name asc')"/>
+                            t-value="request.env['product.brand'].sudo().search(brand_domain, order='name asc')"/>
 
                         <t t-if="brands">
                             <ul class="list-unstyled mb-0">
