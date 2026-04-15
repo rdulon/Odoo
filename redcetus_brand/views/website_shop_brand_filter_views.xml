@@ -32,11 +32,19 @@
                             t-value="request.env['product.brand'].sudo().search(brand_domain, order='name asc')"/>
 
                         <t t-if="brands">
+                            <div class="mb-2">
+                                <a t-att-href="keep(brand=False, page=False)"
+                                t-attf-class="{{ '' if request.params.get('brand') else 'fw-bold text-primary' }}">
+                                    Todas las marcas
+                                </a>
+                            </div>
+
                             <ul class="list-unstyled mb-0">
                                 <t t-foreach="brands" t-as="brand">
                                     <li class="mb-1">
-                                        <a t-att-href="'/shop/marca/%s' % brand.website_slug"
-                                           t-out="brand.name"/>
+                                        <a t-att-href="keep(brand=brand.website_slug, page=False)"
+                                        t-attf-class="{{ 'fw-bold text-primary' if request.params.get('brand') == brand.website_slug else '' }}"
+                                        t-out="brand.name"/>
                                     </li>
                                 </t>
                             </ul>
