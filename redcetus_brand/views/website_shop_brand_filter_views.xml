@@ -5,7 +5,7 @@
               inherit_id="website_sale.products_attributes_collapsible"
               name="Shop sidebar brand filter">
 
-        <xpath expr="//*[contains(@class, 'accordion-item')][last()]" position="after">
+        <xpath expr="//div[contains(@class, 'accordion')]" position="inside">
             <div class="accordion-item">
                 <h2 class="accordion-header" id="brand_filter_heading">
                     <button class="accordion-button collapsed" type="button"
