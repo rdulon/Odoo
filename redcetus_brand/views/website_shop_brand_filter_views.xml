@@ -1,34 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <template id="shop_brand_filter"
-              inherit_id="website_sale.product_attribute_filters_form"
+              inherit_id="website_sale.filter_products_price"
               name="Shop sidebar brand filter">
 
-        <xpath expr="//form" position="inside">
-            <div class="accordion-item">
-                <div class="accordion-header h6 mb-0">
-                    <button class="accordion-button collapsed px-0 bg-transparent shadow-none"
-                            type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#o_products_brands"
-                            aria-controls="o_products_brands"
-                            aria-expanded="false">
+        <xpath expr="//div[@id='o_wsale_price_range_option']" position="after">
+            <div id="o_wsale_brand_option" t-attf-class="position-relative {{_classes}}">
+                <t t-if="is_sidebar_collapsible">
+                    <div class="accordion-item">
+                        <div class="accordion-header h6 mb-0">
+                            <button class="accordion-button px-0 bg-transparent shadow-none collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#o_wsale_brand_option_inner"
+                                    aria-controls="o_wsale_brand_option_inner"
+                                    aria-expanded="false">
+                                <b>Marca</b>
+                            </button>
+                        </div>
+
+                        <div id="o_wsale_brand_option_inner" class="accordion-collapse collapse">
+                            <div class="accordion-body px-0">
+
+                                <t t-set="brand_domain"
+                                   t-value="[('active', '=', True),
+                                             ('product_ids.is_published', '=', True),
+                                             ('product_ids.sale_ok', '=', True)] +
+                                            (category and [('product_ids.public_categ_ids', 'child_of', category.id)] or [])"/>
+
+                                <t t-if="request.params.get('brand')">
+                                    <t t-set="brand_domain"
+                                       t-value="brand_domain + [('website_slug', '=', request.params.get('brand'))]"/>
+                                </t>
+
+                                <t t-set="brands"
+                                   t-value="request.env['product.brand'].sudo().search([
+                                       ('active', '=', True),
+                                       ('product_ids.is_published', '=', True),
+                                       ('product_ids.sale_ok', '=', True)
+                                   ] + (category and [('product_ids.public_categ_ids', 'child_of', category.id)] or []),
+                                   order='name asc')"/>
+
+                                <t t-if="brands">
+                                    <div class="mb-2">
+                                        <a t-att-href="keep(brand=False, page=False)"
+                                           t-attf-class="{{ '' if request.params.get('brand') else 'fw-bold text-primary' }}">
+                                            Todas las marcas
+                                        </a>
+                                    </div>
+
+                                    <ul class="list-unstyled mb-0">
+                                        <t t-foreach="brands" t-as="brand">
+                                            <li class="mb-1">
+                                                <a t-att-href="keep(brand=brand.website_slug, page=False)"
+                                                   t-attf-class="{{ 'fw-bold text-primary' if request.params.get('brand') == brand.website_slug else '' }}"
+                                                   t-out="brand.name"/>
+                                            </li>
+                                        </t>
+                                    </ul>
+                                </t>
+
+                            </div>
+                        </div>
+                    </div>
+                </t>
+
+                <t t-else="">
+                    <label t-attf-class="h6 m-0 {{_classes_title}}">
                         <b>Marca</b>
-                    </button>
-                </div>
-                <div id="o_products_brands"
-                     class="accordion-collapse collapse"
-                     data-bs-parent="wsale_products_attributes_collapse">
-                    <div class="accordion-body px-0">
+                    </label>
 
-                        <t t-set="brand_domain"
-                           t-value="[('active', '=', True),
-                                     ('product_ids.is_published', '=', True),
-                                     ('product_ids.sale_ok', '=', True)] +
-                                    (category and [('product_ids.public_categ_ids', 'child_of', category.id)] or [])"/>
-
+                    <div class="mt-2">
                         <t t-set="brands"
-                           t-value="request.env['product.brand'].sudo().search(brand_domain, order='name asc')"/>
+                           t-value="request.env['product.brand'].sudo().search([
+                               ('active', '=', True),
+                               ('product_ids.is_published', '=', True),
+                               ('product_ids.sale_ok', '=', True)
+                           ] + (category and [('product_ids.public_categ_ids', 'child_of', category.id)] or []),
+                           order='name asc')"/>
 
                         <t t-if="brands">
                             <div class="mb-2">
@@ -49,9 +99,10 @@
                             </ul>
                         </t>
                     </div>
-                </div>
+                </t>
             </div>
         </xpath>
 
     </template>
+
 </odoo>
