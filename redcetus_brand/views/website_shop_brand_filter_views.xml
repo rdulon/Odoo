@@ -5,7 +5,7 @@
               inherit_id="website_sale.filter_products_price"
               name="Shop sidebar brand filter">
 
-        <xpath expr="//div[@id='o_wsale_price_range_option']" position="after">
+        <xpath expr="//div[@id='o_wsale_price_range_option']" position="before">
             <div id="o_wsale_brand_option" t-attf-class="position-relative {{_classes}}">
                 <t t-if="is_sidebar_collapsible">
                     <div class="accordion-item">
