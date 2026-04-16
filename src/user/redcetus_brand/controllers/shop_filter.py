@@ -2,7 +2,6 @@ from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.fields import Domain
 from odoo.http import request
 
-
 class WebsiteSaleBrandFilter(WebsiteSale):
 
     def _get_shop_domain(self, search, category, attribute_value_dict, search_in_description=True):
