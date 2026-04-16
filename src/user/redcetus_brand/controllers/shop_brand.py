@@ -3,6 +3,18 @@ from odoo.http import request
 from werkzeug.exceptions import NotFound
 
 
+def sitemap_shop_by_brand(env, rule, qs):
+    brands = env["product.brand"].sudo().search([
+        ("active", "=", True),
+        ("product_ids.is_published", "=", True),
+        ("product_ids.sale_ok", "=", True),
+    ], order="name asc")
+
+    for brand in brands:
+        if brand.website_slug:
+            yield {"loc": f"/shop/marca/{brand.website_slug}"}
+
+
 class WebsiteSaleBrand(http.Controller):
 
     @http.route(
@@ -10,7 +22,7 @@ class WebsiteSaleBrand(http.Controller):
         type="http",
         auth="public",
         website=True,
-        sitemap=True,
+        sitemap=sitemap_shop_by_brand,
     )
     def shop_by_brand(self, brand_slug, **kwargs):
         brand = request.env["product.brand"].sudo().search(
@@ -46,8 +58,11 @@ class WebsiteSaleBrand(http.Controller):
     )
     def shop_brands(self, **kwargs):
         brands = request.env["product.brand"].sudo().search(
-            [("active", "=", True),
-             ("product_ids.is_published", "=", True),],
+            [
+                ("active", "=", True),
+                ("product_ids.is_published", "=", True),
+                ("product_ids.sale_ok", "=", True),
+            ],
             order="name asc",
         )
 
