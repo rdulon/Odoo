@@ -5,16 +5,23 @@ from odoo.http import request
 
 class WebsiteSaleBrandFilter(WebsiteSale):
 
-    def _add_search_subdomains_hook(self, search):
+    def _get_shop_domain(self, search, category, attribute_value_dict, search_in_description=True):
+        domain = super()._get_shop_domain(
+            search,
+            category,
+            attribute_value_dict,
+            search_in_description=search_in_description,
+        )
+
         brand_slug = request.params.get("brand")
         if not brand_slug:
-            return []
+            return domain
 
         brand = request.env["product.brand"].sudo().search(
             [("website_slug", "=", brand_slug), ("active", "=", True)],
             limit=1,
         )
         if not brand:
-            return []
+            return domain
 
-        return Domain("brand_id", "=", brand.id)
+        return domain & Domain("brand_id", "=", brand.id)
