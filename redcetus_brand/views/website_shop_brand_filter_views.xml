@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <template id="shop_brand_filter"
               inherit_id="website_sale.product_attribute_filters_form"
               name="Shop sidebar brand filter">
@@ -23,18 +22,18 @@
                     <div class="accordion-body px-0">
 
                         <t t-set="brand_domain"
-                            t-value="[('active', '=', True),
-                                      ('product_ids.is_published', '=', True),
-                                      ('product_ids.sale_ok', '=', True)] +
-                                      (category and [('product_ids.public_categ_ids', 'child_of', category.id)] or [])"/>
+                           t-value="[('active', '=', True),
+                                     ('product_ids.is_published', '=', True),
+                                     ('product_ids.sale_ok', '=', True)] +
+                                    (category and [('product_ids.public_categ_ids', 'child_of', category.id)] or [])"/>
 
                         <t t-set="brands"
-                            t-value="request.env['product.brand'].sudo().search(brand_domain, order='name asc')"/>
+                           t-value="request.env['product.brand'].sudo().search(brand_domain, order='name asc')"/>
 
                         <t t-if="brands">
                             <div class="mb-2">
                                 <a t-att-href="keep(brand=False, page=False)"
-                                t-attf-class="{{ '' if request.params.get('brand') else 'fw-bold text-primary' }}">
+                                   t-attf-class="{{ '' if request.params.get('brand') else 'fw-bold text-primary' }}">
                                     Todas las marcas
                                 </a>
                             </div>
@@ -43,8 +42,8 @@
                                 <t t-foreach="brands" t-as="brand">
                                     <li class="mb-1">
                                         <a t-att-href="keep(brand=brand.website_slug, page=False)"
-                                        t-attf-class="{{ 'fw-bold text-primary' if request.params.get('brand') == brand.website_slug else '' }}"
-                                        t-out="brand.name"/>
+                                           t-attf-class="{{ 'fw-bold text-primary' if request.params.get('brand') == brand.website_slug else '' }}"
+                                           t-out="brand.name"/>
                                     </li>
                                 </t>
                             </ul>
@@ -55,5 +54,4 @@
         </xpath>
 
     </template>
-
 </odoo>
