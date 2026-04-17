@@ -10,11 +10,11 @@
                 <div class="container mb-3">
 
                     <div class="d-flex align-items-center gap-3 mb-2">
-                        <t t-if="current_brand.image_1920">
-                            <img t-att-src="'/web/image/product.brand/%s/image_1920' % current_brand.id"
-                                 style="max-height:60px;"/>
+                        <t t-if="current_brand.image_128">
+                            <img t-att-src="'/web/image/product.brand/%s/image_128' % current_brand.id"
+                                style="max-height:60px;"
+                                t-att-alt="current_brand.name"/>
                         </t>
-
                         <h1 class="mb-0" t-out="current_brand.name"/>
                     </div>
 
