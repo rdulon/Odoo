@@ -25,7 +25,18 @@ class WebsiteSaleBrand(WebsiteSale):
         website=True,
         sitemap=sitemap_shop_by_brand,
     )
-    def shop_by_brand(self, brand_slug, page=0, category=None, search="", min_price=0.0, max_price=0.0, tags="", **post):
+    def shop_by_brand(
+        self,
+        brand_slug,
+        page=0,
+        category=None,
+        search="",
+        min_price=0.0,
+        max_price=0.0,
+        tags="",
+        **post
+    ):
+        # Buscar la marca
         brand = request.env["product.brand"].sudo().search(
             [("website_slug", "=", brand_slug), ("active", "=", True)],
             limit=1,
@@ -33,11 +44,14 @@ class WebsiteSaleBrand(WebsiteSale):
         if not brand:
             raise NotFound()
 
+        # Guardar contexto para el filtro
         request.update_context(brand_slug=brand_slug)
 
+        # Asegurar que el parámetro llegue al shop
         post = dict(post)
         post["brand"] = brand_slug
 
+        # Llamar al shop estándar de Odoo
         response = super().shop(
             page=page,
             category=category,
@@ -45,10 +59,10 @@ class WebsiteSaleBrand(WebsiteSale):
             min_price=min_price,
             max_price=max_price,
             tags=tags,
-            brand=brand_slug,
             **post,
         )
 
+        # Pasar datos adicionales al template
         if hasattr(response, "qcontext"):
             response.qcontext.update({
                 "current_brand": brand,
