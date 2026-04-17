@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="brand_header_on_shop"
+              inherit_id="website_sale.products"
+              name="Brand header on shop page">
+
+        <xpath expr="//div[@id='products_grid_before']" position="before">
+            <t t-if="current_brand">
+                <section class="container pb-3">
+                    <div class="mb-3">
+                        <h1 class="mb-2" t-out="current_brand.name"/>
+                        <t t-if="current_brand.description">
+                            <div t-field="current_brand.description"/>
+                        </t>
+                    </div>
+                </section>
+            </t>
+        </xpath>
+
+    </template>
+
+</odoo>

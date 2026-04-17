@@ -1,18 +1,31 @@
 from odoo import http
+from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.http import request
 from werkzeug.exceptions import NotFound
 
 
-class WebsiteSaleBrand(http.Controller):
+def sitemap_shop_by_brand(env, rule, qs):
+    brands = env["product.brand"].sudo().search([
+        ("active", "=", True),
+        ("product_ids.is_published", "=", True),
+        ("product_ids.sale_ok", "=", True),
+    ], order="name asc")
+
+    for brand in brands:
+        if brand.website_slug:
+            yield {"loc": f"/shop/marca/{brand.website_slug}"}
+
+
+class WebsiteSaleBrand(WebsiteSale):
 
     @http.route(
         ["/shop/marca/<string:brand_slug>"],
         type="http",
         auth="public",
         website=True,
-        sitemap=True,
+        sitemap=sitemap_shop_by_brand,
     )
-    def shop_by_brand(self, brand_slug, **kwargs):
+    def shop_by_brand(self, brand_slug, page=0, category=None, search="", min_price=0.0, max_price=0.0, tags="", **post):
         brand = request.env["product.brand"].sudo().search(
             [("website_slug", "=", brand_slug), ("active", "=", True)],
             limit=1,
@@ -20,22 +33,29 @@ class WebsiteSaleBrand(http.Controller):
         if not brand:
             raise NotFound()
 
-        products = request.env["product.template"].sudo().search(
-            [
-                ("sale_ok", "=", True),
-                ("is_published", "=", True),
-                ("brand_id", "=", brand.id),
-            ],
-            order="name asc",
+        request.update_context(brand_slug=brand_slug)
+
+        post = dict(post)
+        post["brand"] = brand_slug
+
+        response = super().shop(
+            page=page,
+            category=category,
+            search=search,
+            min_price=min_price,
+            max_price=max_price,
+            tags=tags,
+            brand=brand_slug,
+            **post,
         )
 
-        return request.render(
-            "redcetus_brand.brand_product_listing",
-            {
-                "brand": brand,
-                "products": products,
-            },
-        )
+        if hasattr(response, "qcontext"):
+            response.qcontext.update({
+                "current_brand": brand,
+                "brand_slug": brand_slug,
+            })
+
+        return response
 
     @http.route(
         ["/shop/marcas"],
@@ -46,8 +66,11 @@ class WebsiteSaleBrand(http.Controller):
     )
     def shop_brands(self, **kwargs):
         brands = request.env["product.brand"].sudo().search(
-            [("active", "=", True),
-             ("product_ids.is_published", "=", True),],
+            [
+                ("active", "=", True),
+                ("product_ids.is_published", "=", True),
+                ("product_ids.sale_ok", "=", True),
+            ],
             order="name asc",
         )
 
