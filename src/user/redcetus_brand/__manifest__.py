@@ -13,6 +13,7 @@
         "views/website_brand_views.xml",
         "views/website_product_brand_views.xml",
         "views/website_shop_brand_filter_views.xml",
+        "views/website_brand_header_views.xml",
     ],
     "installable": True,
     "application": False,

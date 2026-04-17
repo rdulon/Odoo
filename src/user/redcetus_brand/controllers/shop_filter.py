@@ -2,7 +2,15 @@ from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.fields import Domain
 from odoo.http import request
 
+
 class WebsiteSaleBrandFilter(WebsiteSale):
+
+    def _get_current_brand_slug(self):
+        return (
+            request.params.get("brand")
+            or request.params.get("brand_slug")
+            or request.env.context.get("brand_slug")
+        )
 
     def _get_shop_domain(self, search, category, attribute_value_dict, search_in_description=True):
         domain = super()._get_shop_domain(
@@ -12,7 +20,7 @@ class WebsiteSaleBrandFilter(WebsiteSale):
             search_in_description=search_in_description,
         )
 
-        brand_slug = request.params.get("brand")
+        brand_slug = self._get_current_brand_slug()
         if not brand_slug:
             return domain
 
@@ -30,7 +38,7 @@ class WebsiteSaleBrandFilter(WebsiteSale):
             options, post, search, website
         )
 
-        brand_slug = request.params.get("brand")
+        brand_slug = self._get_current_brand_slug()
         if not brand_slug:
             return fuzzy_search_term, product_count, search_result
 
@@ -45,3 +53,12 @@ class WebsiteSaleBrandFilter(WebsiteSale):
         product_count = len(search_result)
 
         return fuzzy_search_term, product_count, search_result
+
+    def _shop_get_query_url_kwargs(self, search, min_price, max_price, order=None, tags=None, **kwargs):
+        values = super()._shop_get_query_url_kwargs(
+            search, min_price, max_price, order=order, tags=tags, **kwargs
+        )
+        brand_slug = self._get_current_brand_slug()
+        if brand_slug:
+            values["brand"] = brand_slug
+        return values

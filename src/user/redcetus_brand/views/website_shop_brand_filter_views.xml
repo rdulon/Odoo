@@ -23,17 +23,6 @@
                         <div id="o_wsale_brand_option_inner" class="accordion-collapse collapse">
                             <div class="accordion-body px-0">
 
-                                <t t-set="brand_domain"
-                                   t-value="[('active', '=', True),
-                                             ('product_ids.is_published', '=', True),
-                                             ('product_ids.sale_ok', '=', True)] +
-                                            (category and [('product_ids.public_categ_ids', 'child_of', category.id)] or [])"/>
-
-                                <t t-if="request.params.get('brand')">
-                                    <t t-set="brand_domain"
-                                       t-value="brand_domain + [('website_slug', '=', request.params.get('brand'))]"/>
-                                </t>
-
                                 <t t-set="brands"
                                    t-value="request.env['product.brand'].sudo().search([
                                        ('active', '=', True),
@@ -44,8 +33,8 @@
 
                                 <t t-if="brands">
                                     <div class="mb-2">
-                                        <a t-att-href="keep(brand=False, page=False)"
-                                           t-attf-class="{{ '' if request.params.get('brand') else 'fw-bold text-primary' }}">
+                                        <a t-att-href="category and ('/shop/category/%s' % slug(category)) or '/shop'"
+                                           t-attf-class="{{ 'fw-bold text-primary' if not request.params.get('brand') and not brand_slug else '' }}">
                                             Todas las marcas
                                         </a>
                                     </div>
@@ -54,7 +43,7 @@
                                         <t t-foreach="brands" t-as="brand">
                                             <li class="mb-1">
                                                 <a t-att-href="keep(brand=brand.website_slug, page=False)"
-                                                   t-attf-class="{{ 'fw-bold text-primary' if request.params.get('brand') == brand.website_slug else '' }}"
+                                                   t-attf-class="{{ 'fw-bold text-primary' if request.params.get('brand') == brand.website_slug or brand_slug == brand.website_slug else '' }}"
                                                    t-out="brand.name"/>
                                             </li>
                                         </t>
@@ -82,8 +71,8 @@
 
                         <t t-if="brands">
                             <div class="mb-2">
-                                <a t-att-href="keep(brand=False, page=False)"
-                                   t-attf-class="{{ '' if request.params.get('brand') else 'fw-bold text-primary' }}">
+                                <a t-att-href="category and ('/shop/category/%s' % slug(category)) or '/shop'"
+                                   t-attf-class="{{ 'fw-bold text-primary' if not request.params.get('brand') and not brand_slug else '' }}">
                                     Todas las marcas
                                 </a>
                             </div>
@@ -92,7 +81,7 @@
                                 <t t-foreach="brands" t-as="brand">
                                     <li class="mb-1">
                                         <a t-att-href="keep(brand=brand.website_slug, page=False)"
-                                           t-attf-class="{{ 'fw-bold text-primary' if request.params.get('brand') == brand.website_slug else '' }}"
+                                           t-attf-class="{{ 'fw-bold text-primary' if request.params.get('brand') == brand.website_slug or brand_slug == brand.website_slug else '' }}"
                                            t-out="brand.name"/>
                                     </li>
                                 </t>
