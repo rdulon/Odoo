@@ -5,6 +5,13 @@
         <field name="model">starken.commune</field>
         <field name="arch" type="xml">
             <list string="Comunas Starken">
+                <header>
+                    <button name="action_import_destination_communes"
+                            type="object"
+                            string="Importar comunas destino"
+                            class="btn-primary"
+                            display="always"/>
+                </header>
                 <field name="name"/>
                 <field name="code"/>
                 <field name="city_name"/>
@@ -20,12 +27,6 @@
         <field name="model">starken.commune</field>
         <field name="arch" type="xml">
             <form string="Comuna Starken">
-                <header>
-                    <button name="action_import_destination_communes"
-                            type="object"
-                            string="Importar comunas destino"
-                            class="btn-primary"/>
-                </header>
                 <sheet>
                     <group>
                         <group>
@@ -53,9 +54,9 @@
     </record>
 
     <menuitem id="menu_starken_root"
-            name="Starken"
-            parent="base.menu_administration"
-            sequence="100"/>
+              name="Starken"
+              parent="base.menu_administration"
+              sequence="100"/>
 
     <menuitem id="menu_starken_commune"
               name="Comunas"
