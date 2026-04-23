@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_starken_commune_tree" model="ir.ui.view">
+        <field name="name">starken.commune.tree</field>
+        <field name="model">starken.commune</field>
+        <field name="arch" type="xml">
+            <list string="Comunas Starken">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="city_name"/>
+                <field name="region_code"/>
+                <field name="state_id"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_starken_commune_form" model="ir.ui.view">
+        <field name="name">starken.commune.form</field>
+        <field name="model">starken.commune</field>
+        <field name="arch" type="xml">
+            <form string="Comuna Starken">
+                <header>
+                    <button name="action_import_destination_communes"
+                            type="object"
+                            string="Importar comunas destino"
+                            class="btn-primary"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="city_name"/>
+                            <field name="city_code"/>
+                        </group>
+                        <group>
+                            <field name="region_code"/>
+                            <field name="state_id"/>
+                            <field name="is_destination"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_starken_commune" model="ir.actions.act_window">
+        <field name="name">Comunas Starken</field>
+        <field name="res_model">starken.commune</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_starken_root"
+              name="Starken"
+              parent="website.menu_website_root"
+              sequence="100"/>
+
+    <menuitem id="menu_starken_commune"
+              name="Comunas"
+              parent="menu_starken_root"
+              action="action_starken_commune"
+              sequence="10"/>
+</odoo>

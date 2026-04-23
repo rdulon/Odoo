@@ -6,6 +6,7 @@
         "security/ir.model.access.csv",
         "views/res_partner_views.xml",
         "views/website_sale_templates.xml",
+        "views/starken_commune_views.xml",
     ],
     "installable": True,
     "application": False,
