@@ -53,9 +53,9 @@
     </record>
 
     <menuitem id="menu_starken_root"
-              name="Starken"
-              parent="website.menu_website_root"
-              sequence="100"/>
+            name="Starken"
+            parent="base.menu_administration"
+            sequence="100"/>
 
     <menuitem id="menu_starken_commune"
               name="Comunas"
