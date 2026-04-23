@@ -34,7 +34,7 @@ class StarkenCommune(models.Model):
             rec.display_name = f"{rec.name} ({rec.city_name})" if rec.city_name else rec.name
 
     @api.model
-    def action_import_destination_communes(self):
+    def action_import_destination_communes(self, *args):
         client = StarkenClient(self.env)
         data = client.listar_ciudades_destino()
 
