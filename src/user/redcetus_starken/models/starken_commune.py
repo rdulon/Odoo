@@ -8,7 +8,7 @@ class StarkenCommune(models.Model):
     _name = "starken.commune"
     _description = "Starken Commune"
     _rec_name = "display_name"
-    _order = "name"
+    _order = "state_id, city_name, name"
 
     name = fields.Char(required=True)
     code = fields.Integer(required=True, index=True)
