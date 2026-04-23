@@ -12,7 +12,8 @@
                         class="form-select">
                     <option value="">Comuna...</option>
                     <t t-foreach="request.env['starken.commune'].sudo().search([], order='name asc')" t-as="commune">
-                        <option t-att-value="commune.id">
+                        <option t-att-value="commune.id"
+                                t-att-selected="'selected' if partner_sudo and partner_sudo.starken_commune_id.id == commune.id else None">
                             <t t-esc="commune.name"/>
                         </option>
                     </t>
