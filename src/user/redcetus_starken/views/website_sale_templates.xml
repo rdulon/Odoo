@@ -5,7 +5,7 @@
         <xpath expr="//form[@name='address_form']/div[contains(@class, 'row')]" position="inside">
             <div class="mb-3 col-lg-6">
                 <label class="col-form-label" for="starken_commune_id">
-                    Comuna (Starken)
+                    Comuna
                 </label>
                 <select name="starken_commune_id"
                         id="starken_commune_id"

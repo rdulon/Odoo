@@ -5,8 +5,11 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='city']" position="after">
-                <field name="starken_commune_id"/>
+            <xpath expr="//field[@name='state_id']" position="after">
+                <field name="starken_commune_id"
+                       string="Comuna"
+                       placeholder="Comuna..."
+                       options="{'no_create': True, 'no_open': True}"/>
             </xpath>
         </field>
     </record>
