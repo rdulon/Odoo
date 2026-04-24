@@ -2,8 +2,7 @@ import logging
 
 from odoo import http
 from odoo.http import request
-from odoo.addons.portal.controllers.portal import CustomerPortal
-from odoo.addons.portal.controllers.portal import PortalAccount
+from odoo.addons.portal.controllers.account import PortalAccount
 
 _logger = logging.getLogger(__name__)
 
