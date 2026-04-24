@@ -8,7 +8,7 @@
                 <header>
                     <button name="action_import_destination_communes"
                             type="object"
-                            string="Importar comunas destino"
+                            string="Importar comunas"
                             class="btn-primary"
                             display="always"/>
                 </header>

@@ -9,11 +9,11 @@ _logger = logging.getLogger(__name__)
 
 class StarkenCustomerPortal(CustomerPortal):
 
-    @http.route()
+    @http.route('/shop/address/submit', type='http', auth='public', methods=['POST'], website=True)
     def address_submit(self, **post):
-        commune_id = post.get("starken_commune_id")
         _logger.warning("STARKEN ADDRESS SUBMIT POST: %s", post)
-        _logger.warning("STARKEN COMMUNE RECEIVED: %s", commune_id)
+
+        commune_id = post.get("starken_commune_id")
 
         response = super().address_submit(**post)
 
@@ -24,10 +24,8 @@ class StarkenCustomerPortal(CustomerPortal):
                 commune_id = False
 
         if commune_id:
-            order = request.website.sale_get_order()
             partner = False
 
-            # En checkout, normalmente viene el partner_id en el post o en la orden.
             partner_id = post.get("partner_id")
             if partner_id:
                 try:
@@ -36,6 +34,7 @@ class StarkenCustomerPortal(CustomerPortal):
                     partner = False
 
             if not partner or not partner.exists():
+                order = request.website.sale_get_order()
                 partner = order.partner_shipping_id or order.partner_id if order else False
 
             if partner and partner.exists():
