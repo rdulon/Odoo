@@ -3,11 +3,12 @@ import logging
 from odoo import http
 from odoo.http import request
 from odoo.addons.portal.controllers.portal import CustomerPortal
+from odoo.addons.portal.controllers.portal import PortalAccount
 
 _logger = logging.getLogger(__name__)
 
 
-class StarkenCustomerPortal(CustomerPortal):
+class StarkenPortalAccount(PortalAccount):
 
     @http.route('/shop/address/submit', type='http', auth='public', methods=['POST'], website=True)
     def address_submit(self, **post):
@@ -24,18 +25,14 @@ class StarkenCustomerPortal(CustomerPortal):
                 commune_id = False
 
         if commune_id:
+            partner_id = post.get("partner_id")
             partner = False
 
-            partner_id = post.get("partner_id")
             if partner_id:
                 try:
                     partner = request.env["res.partner"].sudo().browse(int(partner_id))
                 except (TypeError, ValueError):
                     partner = False
-
-            if not partner or not partner.exists():
-                order = request.website.sale_get_order()
-                partner = order.partner_shipping_id or order.partner_id if order else False
 
             if partner and partner.exists():
                 partner.sudo().write({"starken_commune_id": commune_id})
