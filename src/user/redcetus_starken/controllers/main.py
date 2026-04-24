@@ -2,39 +2,37 @@ import logging
 
 from odoo import http
 from odoo.http import request
-from odoo.addons.portal.controllers.account import PortalAccount
+from odoo.addons.portal.controllers.portal import CustomerPortal
 
 _logger = logging.getLogger(__name__)
 
 
-class StarkenPortalAccount(PortalAccount):
+class StarkenAddressSubmit(http.Controller):
 
     @http.route('/shop/address/submit', type='http', auth='public', methods=['POST'], website=True)
-    def address_submit(self, **post):
+    def starken_address_submit(self, **post):
         _logger.warning("STARKEN ADDRESS SUBMIT POST: %s", post)
 
+        # Buscar el controller original ya registrado para esta ruta.
+        # Si esto no funciona, usaremos el método interno que indiquen los logs.
+        partner_id = post.get("partner_id")
         commune_id = post.get("starken_commune_id")
 
-        response = super().address_submit(**post)
-
-        if commune_id:
+        # Guardar comuna antes del flujo estándar.
+        if partner_id and commune_id:
             try:
+                partner = request.env["res.partner"].sudo().browse(int(partner_id))
                 commune_id = int(commune_id)
-            except (TypeError, ValueError):
-                commune_id = False
+                if partner.exists():
+                    partner.write({"starken_commune_id": commune_id})
+                    _logger.warning("STARKEN COMMUNE SAVED OK ON PARTNER %s", partner.id)
+            except Exception:
+                _logger.exception("STARKEN ERROR SAVING COMMUNE")
 
-        if commune_id:
-            partner_id = post.get("partner_id")
-            partner = False
+        # Ejecutar el submit estándar desde CustomerPortal si existe.
+        portal = CustomerPortal()
+        if hasattr(portal, "address_submit"):
+            return portal.address_submit(**post)
 
-            if partner_id:
-                try:
-                    partner = request.env["res.partner"].sudo().browse(int(partner_id))
-                except (TypeError, ValueError):
-                    partner = False
-
-            if partner and partner.exists():
-                partner.sudo().write({"starken_commune_id": commune_id})
-                _logger.warning("STARKEN COMMUNE SAVED OK ON PARTNER %s", partner.id)
-
-        return response
+        # Fallback temporal: volver al checkout.
+        return request.redirect("/shop/checkout")
