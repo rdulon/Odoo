@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_delivery_carrier_form_starken" model="ir.ui.view">
+        <field name="name">delivery.carrier.form.starken</field>
+        <field name="model">delivery.carrier</field>
+        <field name="inherit_id" ref="delivery.view_delivery_carrier_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='delivery_type']" position="after">
+                <field name="starken_environment"
+                       invisible="delivery_type != 'starken'"/>
+                <field name="starken_rut"
+                       invisible="delivery_type != 'starken'"/>
+                <field name="starken_clave"
+                       password="True"
+                       invisible="delivery_type != 'starken'"/>
+                <field name="starken_origin_commune_id"
+                       invisible="delivery_type != 'starken'"/>
+                <field name="starken_origin_agency_code"
+                       invisible="delivery_type != 'starken'"/>
+                <field name="starken_client_rut"
+                       invisible="delivery_type != 'starken'"/>
+                <field name="starken_timeout"
+                       invisible="delivery_type != 'starken'"/>
+                <field name="starken_debug"
+                       invisible="delivery_type != 'starken'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -7,6 +7,7 @@
         "views/res_partner_views.xml",
         "views/website_sale_templates.xml",
         "views/starken_commune_views.xml",
+        "views/delivery_carrier_views.xml",
     ],
     "installable": True,
     "application": False,
