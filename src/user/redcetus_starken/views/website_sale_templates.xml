@@ -3,22 +3,24 @@
     <template id="website_sale_address_starken_commune"
               inherit_id="website_sale.address">
         <xpath expr="//form[@name='address_form']/div[contains(@class, 'row')]" position="inside">
-            <div class="mb-3 col-lg-6">
-                <label class="col-form-label" for="starken_commune_id">
-                    Comuna
-                </label>
-                <select name="starken_commune_id"
-                        id="starken_commune_id"
-                        class="form-select">
-                    <option value="">Comuna...</option>
-                    <t t-foreach="request.env['starken.commune'].sudo().search([], order='name asc')" t-as="commune">
-                        <option t-att-value="commune.id"
-                                t-att-selected="'selected' if partner_sudo and partner_sudo.starken_commune_id.id == commune.id else None">
-                            <t t-esc="commune.name"/>
-                        </option>
-                    </t>
-                </select>
-            </div>
+            <t t-if="request.website.company_id.country_id.code == 'CL'">
+                <div class="mb-3 col-lg-6">
+                    <label class="col-form-label" for="starken_commune_id">
+                        Comuna
+                    </label>
+                    <select name="starken_commune_id"
+                            id="starken_commune_id"
+                            class="form-select">
+                        <option value="">Comuna...</option>
+                        <t t-foreach="request.env['starken.commune'].sudo().search([], order='name asc')" t-as="commune">
+                            <option t-att-value="commune.id"
+                                    t-att-selected="'selected' if partner_sudo and partner_sudo.starken_commune_id.id == commune.id else None">
+                                <t t-esc="commune.name"/>
+                            </option>
+                        </t>
+                    </select>
+                </div>
+            </t>    
         </xpath>
     </template>
 </odoo>
