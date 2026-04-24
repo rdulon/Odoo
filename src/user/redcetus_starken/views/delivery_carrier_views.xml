@@ -5,24 +5,31 @@
         <field name="model">delivery.carrier</field>
         <field name="inherit_id" ref="delivery.view_delivery_carrier_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='delivery_type']" position="after">
-                <field name="starken_environment"
-                       invisible="delivery_type != 'starken'"/>
-                <field name="starken_rut"
-                       invisible="delivery_type != 'starken'"/>
-                <field name="starken_clave"
-                       password="True"
-                       invisible="delivery_type != 'starken'"/>
-                <field name="starken_origin_commune_id"
-                       invisible="delivery_type != 'starken'"/>
-                <field name="starken_origin_agency_code"
-                       invisible="delivery_type != 'starken'"/>
-                <field name="starken_client_rut"
-                       invisible="delivery_type != 'starken'"/>
-                <field name="starken_timeout"
-                       invisible="delivery_type != 'starken'"/>
-                <field name="starken_debug"
-                       invisible="delivery_type != 'starken'"/>
+
+            <!-- Insertar bloque completo -->
+            <xpath expr="//group" position="inside">
+                <group string="Configuración Starken"
+                       invisible="delivery_type != 'starken'">
+
+                    <field name="starken_environment"/>
+                    <field name="starken_rut"/>
+                    <field name="starken_clave" password="True"/>
+
+                    <field name="starken_origin_commune_id"/>
+                    <field name="starken_origin_agency_code"/>
+
+                    <field name="starken_client_rut"/>
+
+                    <field name="starken_timeout"/>
+                    <field name="starken_debug"/>
+
+                    <field name="starken_delivery_type_code"/>
+
+                    <field name="starken_default_height"/>
+                    <field name="starken_default_width"/>
+                    <field name="starken_default_length"/>
+                    <field name="starken_min_weight"/>
+                </group>
             </xpath>
         </field>
     </record>
