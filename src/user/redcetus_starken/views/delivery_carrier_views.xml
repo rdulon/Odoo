@@ -29,6 +29,8 @@
                     <field name="starken_default_width"/>
                     <field name="starken_default_length"/>
                     <field name="starken_min_weight"/>
+
+                    <field name="starken_rounding"/>
                 </group>
             </xpath>
         </field>

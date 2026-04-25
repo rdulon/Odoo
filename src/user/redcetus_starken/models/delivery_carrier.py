@@ -77,6 +77,12 @@ class DeliveryCarrier(models.Model):
         default=False,
     )
 
+    starken_rounding = fields.Float(
+        string="Redondeo despacho",
+        default=0.0,
+        help="Ejemplo: 100 redondea al múltiplo superior de 100",
+    )
+
     def starken_rate_shipment(self, order):
         self.ensure_one()
 
@@ -175,9 +181,21 @@ class DeliveryCarrier(models.Model):
                 "warning_message": False,
             }
 
+        base_price = float(selected.get("costoTotal", 0))
+        price = self._starken_apply_rounding(base_price)
+
         return {
             "success": True,
-            "price": float(selected.get("costoTotal", 0)),
+            "price": price,
             "error_message": False,
             "warning_message": False,
         }
+
+    def _starken_apply_rounding(self, price):
+        self.ensure_one()
+
+        if not self.starken_rounding or self.starken_rounding <= 0:
+            return price
+
+        rounding = self.starken_rounding
+        return ((price + rounding - 1) // rounding) * rounding       
