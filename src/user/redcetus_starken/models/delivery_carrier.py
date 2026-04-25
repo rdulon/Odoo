@@ -83,6 +83,12 @@ class DeliveryCarrier(models.Model):
         help="Ejemplo: 100 redondea al múltiplo superior de 100",
     )
 
+    starken_fallback_price = fields.Float(
+        string="Precio fallback Starken",
+        default=0.0,
+        help="Precio usado si Starken no responde",
+    )
+
     def starken_rate_shipment(self, order):
         self.ensure_one()
 
@@ -93,7 +99,7 @@ class DeliveryCarrier(models.Model):
             return {
                 "success": False,
                 "price": 0.0,
-                "error_message": "Debe seleccionar una comuna Starken en la dirección de despacho.",
+                "error_message": "Debe seleccionar una comuna en la dirección de despacho.",
                 "warning_message": False,
             }
 
@@ -145,15 +151,31 @@ class DeliveryCarrier(models.Model):
             )
             response.raise_for_status()
             data = response.json()
-        except Exception as error:
+        except Exception:
+            if self.starken_fallback_price:
+                return {
+                    "success": True,
+                    "price": self._starken_apply_rounding(self.starken_fallback_price),
+                    "error_message": False,
+                    "warning_message": "No se pudo cotizar con Starken. Se muestra tarifa estimada.",
+                }
+
             return {
                 "success": False,
                 "price": 0.0,
-                "error_message": f"Error consultando tarifa Starken: {error}",
+                "error_message": "No fue posible calcular el despacho en este momento.",
                 "warning_message": False,
             }
 
         if data.get("codigoRespuesta") != 1:
+            if self.starken_fallback_price:
+                return {
+                    "success": True,
+                    "price": self._starken_apply_rounding(self.starken_fallback_price),
+                    "error_message": False,
+                    "warning_message": data.get("mensajeRespuesta") or "Tarifa estimada aplicada.",
+                }
+
             return {
                 "success": False,
                 "price": 0.0,
@@ -174,10 +196,18 @@ class DeliveryCarrier(models.Model):
             selected = min(tarifas, key=lambda t: t.get("costoTotal", 0))
 
         if not selected:
+            if self.starken_fallback_price:
+                return {
+                    "success": True,
+                    "price": self._starken_apply_rounding(self.starken_fallback_price),
+                    "error_message": False,
+                    "warning_message": "No hay tarifas disponibles. Se muestra valor estimado.",
+                }
+
             return {
                 "success": False,
                 "price": 0.0,
-                "error_message": "Starken no devolvió tarifas disponibles.",
+                "error_message": "Sistema no devolvió tarifas disponibles.",
                 "warning_message": False,
             }
 

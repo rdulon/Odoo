@@ -31,6 +31,8 @@
                     <field name="starken_min_weight"/>
 
                     <field name="starken_rounding"/>
+
+                    <field name="starken_fallback_price"/>
                 </group>
             </xpath>
         </field>
