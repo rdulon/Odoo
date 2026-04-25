@@ -111,11 +111,24 @@ class DeliveryCarrier(models.Model):
                 "warning_message": False,
             }
 
-        weight = sum(
-            line.product_id.weight * line.product_uom_qty
-            for line in order.order_line
-            if not line.is_delivery and line.product_id
-        )
+        total_weight = 0.0
+        total_volume = 0.0
+
+        for line in order.order_line:
+            if line.is_delivery or not line.product_id:
+                continue
+
+            qty = line.product_uom_qty
+            product = line.product_id
+
+            total_weight += (product.weight or 0.0) * qty
+            total_volume += (product.volume or 0.0) * qty
+
+        # convertir volumen m3 → kg volumétricos
+        volumetric_weight = total_volume * 250  # factor estándar Chile
+
+        # usar el mayor
+        weight = max(total_weight, volumetric_weight, self.starken_min_weight or 1.0)
 
         weight = max(weight, self.starken_min_weight or 1.0)
 
