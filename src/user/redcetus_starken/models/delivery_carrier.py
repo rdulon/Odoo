@@ -231,7 +231,7 @@ class DeliveryCarrier(models.Model):
         price = self._apply_margins(price)
 
         # free shipping manual (porque Odoo no lo aplica automáticamente aquí)
-        if self.free_over and order.amount_total >= self.free_over:
+        if self.free_over and self.amount_over and order.amount_total >= self.amount_over:
             price = 0.0
 
         return {
