@@ -224,22 +224,24 @@ class DeliveryCarrier(models.Model):
                 "warning_message": False,
             }
 
-        base_price = float(selected.get("costoTotal", 0))
-        price = self._starken_apply_rounding(base_price)
+            base_price = float(selected.get("costoTotal", 0))
+            price = self._starken_apply_rounding(base_price)
 
-        # aplicar lógica estándar Odoo (free shipping, margins, etc)
-        price = self._apply_margins(price)
+            products_subtotal = sum(
+                line.price_subtotal
+                for line in order.order_line
+                if not line.is_delivery
+            )
 
-        # free shipping manual (porque Odoo no lo aplica automáticamente aquí)
-        if self.free_over and self.amount > 0 and order.amount_untaxed >= self.amount:
-            price = 0.0
-                       
-        return {
-            "success": True,
-            "price": price,
-            "error_message": False,
-            "warning_message": False,
-        }
+            if self.free_over and self.amount > 0 and products_subtotal >= self.amount:
+                price = 0.0
+
+            return {
+                "success": True,
+                "price": price,
+                "error_message": False,
+                "warning_message": False,
+            }
 
     def _starken_apply_rounding(self, price):
         self.ensure_one()
