@@ -227,6 +227,13 @@ class DeliveryCarrier(models.Model):
         base_price = float(selected.get("costoTotal", 0))
         price = self._starken_apply_rounding(base_price)
 
+        # aplicar lógica estándar Odoo (free shipping, margins, etc)
+        price = self._apply_margins(price)
+
+        # free shipping manual (porque Odoo no lo aplica automáticamente aquí)
+        if self.free_over and order.amount_total >= self.free_over:
+            price = 0.0
+
         return {
             "success": True,
             "price": price,
