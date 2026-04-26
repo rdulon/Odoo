@@ -80,13 +80,11 @@ class DeliveryCarrier(models.Model):
     starken_rounding = fields.Float(
         string="Redondeo despacho",
         default=0.0,
-        help="Ejemplo: 100 redondea al múltiplo superior de 100",
     )
 
     starken_fallback_price = fields.Float(
         string="Precio fallback Starken",
         default=0.0,
-        help="Precio usado si Starken no responde",
     )
 
     def starken_rate_shipment(self, order):
@@ -107,10 +105,13 @@ class DeliveryCarrier(models.Model):
             return {
                 "success": False,
                 "price": 0.0,
-                "error_message": "Debe configurar la comuna origen Starken en el método de envío.",
+                "error_message": "Debe configurar la comuna origen Starken.",
                 "warning_message": False,
             }
 
+        # =========================
+        # PESO Y VOLUMEN
+        # =========================
         total_weight = 0.0
         total_volume = 0.0
 
@@ -124,22 +125,20 @@ class DeliveryCarrier(models.Model):
             total_weight += (product.weight or 0.0) * qty
             total_volume += (product.volume or 0.0) * qty
 
-        # convertir volumen m3 → kg volumétricos
-        volumetric_weight = total_volume * 250  # factor estándar Chile
-
-        # usar el mayor
+        volumetric_weight = total_volume * 250
         weight = max(total_weight, volumetric_weight, self.starken_min_weight or 1.0)
 
-        weight = max(weight, self.starken_min_weight or 1.0)
-
+        # =========================
+        # REQUEST API
+        # =========================
         payload = {
             "codigoCiudadOrigen": self.starken_origin_commune_id.city_code,
             "codigoCiudadDestino": commune.city_code,
             "codigoAgenciaDestino": 0,
             "codigoAgenciaOrigen": self.starken_origin_agency_code or 0,
-            "alto": self.starken_default_height or 10.0,
-            "ancho": self.starken_default_width or 10.0,
-            "largo": self.starken_default_length or 10.0,
+            "alto": self.starken_default_height,
+            "ancho": self.starken_default_width,
+            "largo": self.starken_default_length,
             "kilos": weight,
             "cuentaCorriente": "",
             "cuentaCorrienteDV": "",
@@ -164,35 +163,39 @@ class DeliveryCarrier(models.Model):
             )
             response.raise_for_status()
             data = response.json()
+
         except Exception:
             if self.starken_fallback_price:
                 return {
                     "success": True,
                     "price": self._starken_apply_rounding(self.starken_fallback_price),
                     "error_message": False,
-                    "warning_message": "No se pudo cotizar con Starken. Se muestra tarifa estimada.",
+                    "warning_message": "Tarifa estimada aplicada.",
                 }
 
             return {
                 "success": False,
                 "price": 0.0,
-                "error_message": "No fue posible calcular el despacho en este momento.",
+                "error_message": "No fue posible calcular el despacho.",
                 "warning_message": False,
             }
 
+        # =========================
+        # RESPUESTA API
+        # =========================
         if data.get("codigoRespuesta") != 1:
             if self.starken_fallback_price:
                 return {
                     "success": True,
                     "price": self._starken_apply_rounding(self.starken_fallback_price),
                     "error_message": False,
-                    "warning_message": data.get("mensajeRespuesta") or "Tarifa estimada aplicada.",
+                    "warning_message": "Tarifa estimada aplicada.",
                 }
 
             return {
                 "success": False,
                 "price": 0.0,
-                "error_message": data.get("mensajeRespuesta") or "Starken no entregó tarifa.",
+                "error_message": data.get("mensajeRespuesta"),
                 "warning_message": False,
             }
 
@@ -200,8 +203,8 @@ class DeliveryCarrier(models.Model):
         selected = False
 
         for tarifa in tarifas:
-            tipo_entrega = tarifa.get("tipoEntrega", {})
-            if str(tipo_entrega.get("codigoTipoEntrega")) == str(self.starken_delivery_type_code or "2"):
+            tipo = tarifa.get("tipoEntrega", {})
+            if str(tipo.get("codigoTipoEntrega")) == str(self.starken_delivery_type_code):
                 selected = tarifa
                 break
 
@@ -214,34 +217,39 @@ class DeliveryCarrier(models.Model):
                     "success": True,
                     "price": self._starken_apply_rounding(self.starken_fallback_price),
                     "error_message": False,
-                    "warning_message": "No hay tarifas disponibles. Se muestra valor estimado.",
+                    "warning_message": "Tarifa estimada aplicada.",
                 }
 
             return {
                 "success": False,
                 "price": 0.0,
-                "error_message": "Sistema no devolvió tarifas disponibles.",
+                "error_message": "Sin tarifas disponibles.",
                 "warning_message": False,
             }
 
-            base_price = float(selected.get("costoTotal", 0))
-            price = self._starken_apply_rounding(base_price)
+        # =========================
+        # PRECIO FINAL
+        # =========================
+        base_price = float(selected.get("costoTotal", 0))
+        price = self._starken_apply_rounding(base_price)
 
-            products_subtotal = sum(
-                line.price_subtotal
-                for line in order.order_line
-                if not line.is_delivery
-            )
+        # subtotal SOLO productos
+        products_subtotal = sum(
+            line.price_subtotal
+            for line in order.order_line
+            if not line.is_delivery
+        )
 
-            if self.free_over and self.amount > 0 and products_subtotal >= self.amount:
-                price = 0.0
+        # FREE SHIPPING CORRECTO
+        if self.free_over and self.amount > 0 and products_subtotal >= self.amount:
+            price = 0.0
 
-            return {
-                "success": True,
-                "price": price,
-                "error_message": False,
-                "warning_message": False,
-            }
+        return {
+            "success": True,
+            "price": price,
+            "error_message": False,
+            "warning_message": False,
+        }
 
     def _starken_apply_rounding(self, price):
         self.ensure_one()
@@ -250,4 +258,4 @@ class DeliveryCarrier(models.Model):
             return price
 
         rounding = self.starken_rounding
-        return ((price + rounding - 1) // rounding) * rounding       
+        return ((price + rounding - 1) // rounding) * rounding
