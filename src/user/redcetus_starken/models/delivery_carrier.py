@@ -87,6 +87,12 @@ class DeliveryCarrier(models.Model):
         default=0.0,
     )
 
+    starken_free_shipping_state_ids = fields.Many2many(
+        "res.country.state",
+        string="Regiones con despacho gratis",
+        help="Si se configura, el despacho gratis solo aplica para estas regiones.",
+    )
+
     def starken_rate_shipment(self, order):
         self.ensure_one()
 
@@ -241,9 +247,19 @@ class DeliveryCarrier(models.Model):
         )
 
         # FREE SHIPPING CORRECTO
-        if self.free_over and self.amount > 0 and products_subtotal >= self.amount:
-            price = 0.0
+        free_shipping_allowed = True
 
+        if self.starken_free_shipping_state_ids:
+            free_shipping_allowed = commune.state_id in self.starken_free_shipping_state_ids
+
+        if (
+            self.free_over
+            and self.amount > 0
+            and products_subtotal >= self.amount
+            and free_shipping_allowed
+        ):
+            price = 0.0
+            
         return {
             "success": True,
             "price": price,

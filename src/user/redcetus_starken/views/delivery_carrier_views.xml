@@ -33,6 +33,9 @@
                     <field name="starken_rounding"/>
 
                     <field name="starken_fallback_price"/>
+
+                    <field name="starken_free_shipping_state_ids"
+                        widget="many2many_tags"/>                    
                 </group>
             </xpath>
         </field>
