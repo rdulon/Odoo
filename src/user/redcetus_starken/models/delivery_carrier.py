@@ -87,6 +87,16 @@ class DeliveryCarrier(models.Model):
         default=0.0,
     )
 
+    starken_free_over = fields.Boolean(
+        string="Despacho gratis Starken",
+        default=False,
+    )
+
+    starken_free_over_amount = fields.Float(
+        string="Monto mínimo despacho gratis Starken",
+        default=0.0,
+    )
+
     starken_free_shipping_state_ids = fields.Many2many(
         "res.country.state",
         string="Regiones con despacho gratis",
@@ -255,9 +265,9 @@ class DeliveryCarrier(models.Model):
             free_shipping_allowed = destination_state in self.starken_free_shipping_state_ids
 
         if (
-            self.free_over
-            and self.amount > 0
-            and products_subtotal >= self.amount
+            self.starken_free_over
+            and self.starken_free_over_amount > 0
+            and products_subtotal >= self.starken_free_over_amount
             and free_shipping_allowed
         ):
             price = 0.0

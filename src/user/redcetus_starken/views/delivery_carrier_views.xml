@@ -34,8 +34,12 @@
 
                     <field name="starken_fallback_price"/>
 
+                    <field name="starken_free_over"/>
+                    <field name="starken_free_over_amount"
+                        invisible="not starken_free_over"/>
                     <field name="starken_free_shipping_state_ids"
-                        widget="many2many_tags"/>                    
+                        widget="many2many_tags"
+                        invisible="not starken_free_over"/>          
                 </group>
             </xpath>
         </field>
