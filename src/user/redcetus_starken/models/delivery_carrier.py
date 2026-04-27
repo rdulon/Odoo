@@ -247,10 +247,12 @@ class DeliveryCarrier(models.Model):
         )
 
         # FREE SHIPPING CORRECTO
+        destination_state = order.partner_shipping_id.state_id
+
         free_shipping_allowed = True
 
         if self.starken_free_shipping_state_ids:
-            free_shipping_allowed = commune.state_id in self.starken_free_shipping_state_ids
+            free_shipping_allowed = destination_state in self.starken_free_shipping_state_ids
 
         if (
             self.free_over
