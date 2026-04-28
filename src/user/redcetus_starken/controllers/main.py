@@ -32,3 +32,35 @@ class WebsiteSaleStarken(WebsiteSale):
                 pass
 
         return response
+
+class StarkenCommuneController(http.Controller):
+
+    @http.route(
+        "/starken/communes/by_state",
+        type="jsonrpc",
+        auth="public",
+        website=True,
+    )
+    def communes_by_state(self, state_id=None):
+        try:
+            state_id = int(state_id or 0)
+        except (TypeError, ValueError):
+            state_id = 0
+
+        domain = [("active", "=", True)]
+
+        if state_id:
+            domain.append(("state_id", "=", state_id))
+
+        communes = request.env["starken.commune"].sudo().search(
+            domain,
+            order="name asc",
+        )
+
+        return [
+            {
+                "id": commune.id,
+                "name": commune.display_name or commune.name,
+            }
+            for commune in communes
+        ]        

@@ -11,4 +11,9 @@
     ],
     "installable": True,
     "application": False,
+    "assets": {
+        "web.assets_frontend": [
+            "redcetus_starken/static/src/js/starken_commune_filter.js",
+        ],
+    },    
 }

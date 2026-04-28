@@ -42,42 +42,51 @@ class StarkenCommune(models.Model):
             raise UserError("Starken respondió con error: %s" % data.get("mensajeRespuesta"))
 
         State = self.env["res.country.state"].sudo()
+        Commune = self.env["starken.commune"].sudo()
 
         region_map = {
-            15: "AP",
-            1: "TA",
-            2: "AN",
-            3: "AT",
-            4: "CO",
-            5: "VS",
-            13: "RM",
-            6: "LI",
-            7: "ML",
-            16: "NB",
-            8: "BI",
-            9: "AR",
-            14: "LR",
-            10: "LL",
-            11: "AI",
-            12: "MA",
+            1: "CL-TA",
+            2: "CL-AN",
+            3: "CL-AT",
+            4: "CL-CO",
+            5: "CL-VS",
+            6: "CL-LI",
+            7: "CL-ML",
+            8: "CL-BI",
+            9: "CL-AR",
+            10: "CL-LR",
+            11: "CL-AI",
+            12: "CL-MA",
+            13: "CL-RM",
+            14: "CL-LL",
+            15: "CL-AP",
+            16: "CL-NB",
         }
 
         created = 0
         updated = 0
+        without_state = 0
 
         for city in data.get("listaCiudadesDestino", []):
-            region_code = city.get("codigoRegion")
+            try:
+                region_code = int(city.get("codigoRegion") or 0)
+            except (TypeError, ValueError):
+                region_code = 0
+
             city_code = city.get("codigoCiudad")
             city_name = city.get("nombreCiudad")
             communes = city.get("listaComunas", []) or []
 
             state = False
-            region_short = region_map.get(region_code)
-            if region_short:
+            state_code = region_map.get(region_code)
+            if state_code:
                 state = State.search([
                     ("country_id.code", "=", "CL"),
-                    ("code", "=", region_short),
+                    ("code", "=", state_code),
                 ], limit=1)
+
+            if not state:
+                without_state += len(communes)
 
             for commune in communes:
                 vals = {
@@ -91,21 +100,25 @@ class StarkenCommune(models.Model):
                     "active": True,
                 }
 
-                existing = self.search([("code", "=", vals["code"])], limit=1)
+                existing = Commune.search([("code", "=", vals["code"])], limit=1)
                 if existing:
                     existing.write(vals)
                     updated += 1
                 else:
-                    self.create(vals)
+                    Commune.create(vals)
                     created += 1
+
+        message = f"Comunas creadas: {created}, actualizadas: {updated}"
+        if without_state:
+            message += f". Sin región Odoo: {without_state}"
 
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
             "params": {
                 "title": "Importación completada",
-                "message": f"Comunas creadas: {created}, actualizadas: {updated}",
-                "type": "success",
+                "message": message,
+                "type": "success" if not without_state else "warning",
                 "sticky": False,
             },
         }
