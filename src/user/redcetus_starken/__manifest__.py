@@ -1,7 +1,7 @@
 {
     "name": "RedCetus Delivery Starken",
     "version": "19.0.1.0.0",
-    "depends": ["base", "contacts", "website_sale", "website_sale_delivery", "delivery"],
+    "depends": ["base", "contacts", "website_sale", "delivery"],
     "data": [
         "security/ir.model.access.csv",
         "views/res_partner_views.xml",
