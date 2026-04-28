@@ -2,48 +2,41 @@
 
 import { rpc } from "@web/core/network/rpc";
 
-document.addEventListener("DOMContentLoaded", () => {
+function initStarkenCommuneFilter() {
     const stateSelect = document.querySelector('select[name="state_id"]');
     const communeSelect = document.querySelector('select[name="starken_commune_id"]');
 
-    if (!stateSelect || !communeSelect) {
+    if (!stateSelect || !communeSelect || communeSelect.dataset.starkenFilterReady) {
         return;
     }
 
-    const currentCommuneId = communeSelect.value;
+    communeSelect.dataset.starkenFilterReady = "1";
 
     async function loadCommunesByState(stateId, selectedCommuneId = null) {
-        communeSelect.innerHTML = "";
-
-        const defaultOption = document.createElement("option");
-        defaultOption.value = "";
-        defaultOption.textContent = "Seleccione comuna";
-        communeSelect.appendChild(defaultOption);
+        communeSelect.innerHTML = '<option value="">Seleccione comuna</option>';
 
         if (!stateId) {
             return;
         }
 
-        try {
-            const communes = await rpc("/starken/communes/by_state", {
-                state_id: stateId,
-            });
+        const communes = await rpc("/starken/communes/by_state", {
+            state_id: stateId,
+        });
 
-            for (const commune of communes) {
-                const option = document.createElement("option");
-                option.value = commune.id;
-                option.textContent = commune.name;
+        for (const commune of communes) {
+            const option = document.createElement("option");
+            option.value = commune.id;
+            option.textContent = commune.name;
 
-                if (selectedCommuneId && String(commune.id) === String(selectedCommuneId)) {
-                    option.selected = true;
-                }
-
-                communeSelect.appendChild(option);
+            if (selectedCommuneId && String(commune.id) === String(selectedCommuneId)) {
+                option.selected = true;
             }
-        } catch (error) {
-            console.error("Error loading Starken communes", error);
+
+            communeSelect.appendChild(option);
         }
     }
+
+    const currentCommuneId = communeSelect.value;
 
     stateSelect.addEventListener("change", () => {
         loadCommunesByState(stateSelect.value);
@@ -52,4 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (stateSelect.value) {
         loadCommunesByState(stateSelect.value, currentCommuneId);
     }
-});
+}
+
+document.addEventListener("DOMContentLoaded", initStarkenCommuneFilter);
+document.addEventListener("click", () => setTimeout(initStarkenCommuneFilter, 300));
