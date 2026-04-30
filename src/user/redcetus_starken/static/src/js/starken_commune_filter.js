@@ -61,7 +61,7 @@ function applyVisibility() {
     }
 }
 
-async function loadCommunes() {
+async function loadCommunes(keepCurrent = false) {
     const stateSelect = document.querySelector('select[name="state_id"]');
     const communeSelect = document.querySelector('select[name="starken_commune_id"]');
     const countrySelect = document.querySelector('select[name="country_id"]');
@@ -70,6 +70,7 @@ async function loadCommunes() {
     if (!isChile(countrySelect)) return;
 
     const stateId = stateSelect.value;
+    const currentCommuneId = keepCurrent ? communeSelect.value : "";
 
     communeSelect.innerHTML = '<option value="">Seleccione comuna</option>';
 
@@ -83,8 +84,15 @@ async function loadCommunes() {
         const option = document.createElement("option");
         option.value = commune.id;
         option.textContent = commune.name;
+
+        if (currentCommuneId && String(commune.id) === String(currentCommuneId)) {
+            option.selected = true;
+        }
+
         communeSelect.appendChild(option);
     }
+
+    applyVisibility();
 }
 
 function initEvents() {
@@ -99,11 +107,11 @@ function initEvents() {
 
     countrySelect.addEventListener("change", () => {
         applyVisibility();
-        loadCommunes();
+        loadCommunes(false);
     });
 
     stateSelect.addEventListener("change", () => {
-        loadCommunes();
+        loadCommunes(false);
     });
 
     communeSelect.addEventListener("change", () => {
@@ -126,4 +134,5 @@ observer.observe(document.body, {
 document.addEventListener("DOMContentLoaded", () => {
     applyVisibility();
     initEvents();
+    loadCommunes(true);
 });
