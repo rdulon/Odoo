@@ -2,136 +2,128 @@
 
 import { rpc } from "@web/core/network/rpc";
 
-function getFieldWrapper(field) {
-    if (!field) return null;
-    return field.closest(".mb-3, .col-lg-4, .col-lg-6, .col-md-6, .form-group, div");
+function isChile(countrySelect) {
+    const selected = countrySelect.options[countrySelect.selectedIndex];
+    const text = selected ? selected.textContent.toLowerCase() : "";
+    return text.includes("chile");
 }
 
-function initStarkenForm() {
+function getWrapper(el) {
+    if (!el) return null;
+    return el.closest(".mb-3, .col-lg-4, .col-lg-6, .col-md-6, div");
+}
+
+function applyVisibility() {
     const countrySelect = document.querySelector('select[name="country_id"]');
     const stateSelect = document.querySelector('select[name="state_id"]');
     const communeSelect = document.querySelector('select[name="starken_commune_id"]');
     const cityInput = document.querySelector('input[name="city"]');
     const zipInput = document.querySelector('input[name="zip"]');
 
-    if (!countrySelect || !stateSelect || !communeSelect) {
-        return;
+    if (!countrySelect || !communeSelect) return;
+
+    const chile = isChile(countrySelect);
+
+    const communeWrapper = getWrapper(communeSelect);
+    const cityWrapper = getWrapper(cityInput);
+    const zipWrapper = getWrapper(zipInput);
+
+    if (communeWrapper) {
+        communeWrapper.style.display = chile ? "" : "none";
     }
 
-    const communeWrapper = getFieldWrapper(communeSelect);
-    const cityWrapper = getFieldWrapper(cityInput);
-    const zipWrapper = getFieldWrapper(zipInput);
-
-    function isChile() {
-        const selected = countrySelect.options[countrySelect.selectedIndex];
-        const text = selected ? selected.textContent.trim().toLowerCase() : "";
-        return text.includes("chile");
+    if (cityWrapper) {
+        cityWrapper.style.display = chile ? "none" : "";
     }
 
-    function updateVisibility() {
-        const chile = isChile();
-
-        if (communeWrapper) {
-            communeWrapper.style.display = chile ? "" : "none";
-        }
-
-        if (cityWrapper) {
-            cityWrapper.style.display = chile ? "none" : "";
-        }
-
-        if (zipWrapper) {
-            zipWrapper.style.display = chile ? "none" : "";
-        }
-
-        if (!chile) {
-            communeSelect.value = "";
-        }
-
-        if (chile && zipInput && !zipInput.value) {
-            zipInput.value = "0000000";
-        }
+    if (zipWrapper) {
+        zipWrapper.style.display = chile ? "none" : "";
     }
 
-    async function loadCommunesByState(stateId, selectedCommuneId = null) {
-        communeSelect.innerHTML = '<option value="">Seleccione comuna</option>';
-
-        if (!stateId || !isChile()) {
-            return;
-        }
-
-        const communes = await rpc("/starken/communes/by_state", {
-            state_id: stateId,
-        });
-
-        for (const commune of communes) {
-            const option = document.createElement("option");
-            option.value = commune.id;
-            option.textContent = commune.name;
-            option.dataset.name = commune.name;
-
-            if (selectedCommuneId && String(commune.id) === String(selectedCommuneId)) {
-                option.selected = true;
-            }
-
-            communeSelect.appendChild(option);
-        }
+    // limpiar comuna si no es Chile
+    if (!chile) {
+        communeSelect.value = "";
     }
 
-    function syncCityZipFromCommune() {
-        if (!isChile()) return;
-
+    // autocompletar city + zip
+    if (chile) {
         const selected = communeSelect.options[communeSelect.selectedIndex];
 
         if (selected && selected.value) {
             if (cityInput) {
-                cityInput.value = selected.dataset.name || selected.textContent;
-            }
-            if (zipInput && !zipInput.value) {
-                zipInput.value = "0000000";
+                cityInput.value = selected.textContent;
             }
         }
-    }
 
-    if (communeSelect.dataset.starkenInitialized !== "1") {
-        communeSelect.dataset.starkenInitialized = "1";
-
-        countrySelect.addEventListener("change", async () => {
-            updateVisibility();
-            await loadCommunesByState(stateSelect.value);
-        });
-
-        stateSelect.addEventListener("change", async () => {
-            await loadCommunesByState(stateSelect.value);
-            updateVisibility();
-        });
-
-        communeSelect.addEventListener("change", syncCityZipFromCommune);
-    }
-
-    const currentCommuneId = communeSelect.value;
-
-    updateVisibility();
-
-    if (stateSelect.value) {
-        loadCommunesByState(stateSelect.value, currentCommuneId).then(() => {
-            updateVisibility();
-            syncCityZipFromCommune();
-        });
+        if (zipInput && !zipInput.value) {
+            zipInput.value = "0000000";
+        }
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    initStarkenForm();
-    setTimeout(initStarkenForm, 500);
-    setTimeout(initStarkenForm, 1500);
+async function loadCommunes() {
+    const stateSelect = document.querySelector('select[name="state_id"]');
+    const communeSelect = document.querySelector('select[name="starken_commune_id"]');
+    const countrySelect = document.querySelector('select[name="country_id"]');
+
+    if (!stateSelect || !communeSelect || !countrySelect) return;
+    if (!isChile(countrySelect)) return;
+
+    const stateId = stateSelect.value;
+
+    communeSelect.innerHTML = '<option value="">Seleccione comuna</option>';
+
+    if (!stateId) return;
+
+    const communes = await rpc("/starken/communes/by_state", {
+        state_id: stateId,
+    });
+
+    for (const commune of communes) {
+        const option = document.createElement("option");
+        option.value = commune.id;
+        option.textContent = commune.name;
+        communeSelect.appendChild(option);
+    }
+}
+
+function initEvents() {
+    const countrySelect = document.querySelector('select[name="country_id"]');
+    const stateSelect = document.querySelector('select[name="state_id"]');
+    const communeSelect = document.querySelector('select[name="starken_commune_id"]');
+
+    if (!countrySelect || !stateSelect || !communeSelect) return;
+
+    if (countrySelect.dataset.starkenInit) return;
+    countrySelect.dataset.starkenInit = "1";
+
+    countrySelect.addEventListener("change", () => {
+        applyVisibility();
+        loadCommunes();
+    });
+
+    stateSelect.addEventListener("change", () => {
+        loadCommunes();
+    });
+
+    communeSelect.addEventListener("change", () => {
+        applyVisibility();
+    });
+}
+
+// 🔥 CLAVE: detectar re-render de Odoo
+const observer = new MutationObserver(() => {
+    applyVisibility();
+    initEvents();
 });
 
-document.addEventListener("change", (event) => {
-    if (
-        event.target.matches('select[name="country_id"]') ||
-        event.target.matches('select[name="state_id"]') ||
-        event.target.matches('select[name="starken_commune_id"]')
-    ) {
-        setTimeout(initStarkenForm, 100);
-    }
+observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+});
+
+// Init inicial
+document.addEventListener("DOMContentLoaded", () => {
+    applyVisibility();
+    initEvents();
 });
