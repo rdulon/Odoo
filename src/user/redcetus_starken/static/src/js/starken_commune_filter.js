@@ -18,13 +18,6 @@ function initStarkenForm() {
         return;
     }
 
-    if (communeSelect.dataset.starkenInitialized === "1") {
-        updateVisibility();
-        return;
-    }
-
-    communeSelect.dataset.starkenInitialized = "1";
-
     const communeWrapper = getFieldWrapper(communeSelect);
     const cityWrapper = getFieldWrapper(cityInput);
     const zipWrapper = getFieldWrapper(zipInput);
@@ -93,27 +86,34 @@ function initStarkenForm() {
             if (cityInput) {
                 cityInput.value = selected.dataset.name || selected.textContent;
             }
-            if (zipInput) {
-                zipInput.value = zipInput.value || "0000000";
+            if (zipInput && !zipInput.value) {
+                zipInput.value = "0000000";
             }
         }
     }
 
-    countrySelect.addEventListener("change", async () => {
-        updateVisibility();
-        await loadCommunesByState(stateSelect.value);
-    });
+    if (communeSelect.dataset.starkenInitialized !== "1") {
+        communeSelect.dataset.starkenInitialized = "1";
 
-    stateSelect.addEventListener("change", async () => {
-        await loadCommunesByState(stateSelect.value);
-    });
+        countrySelect.addEventListener("change", async () => {
+            updateVisibility();
+            await loadCommunesByState(stateSelect.value);
+        });
 
-    communeSelect.addEventListener("change", syncCityZipFromCommune);
+        stateSelect.addEventListener("change", async () => {
+            await loadCommunesByState(stateSelect.value);
+            updateVisibility();
+        });
+
+        communeSelect.addEventListener("change", syncCityZipFromCommune);
+    }
+
+    const currentCommuneId = communeSelect.value;
 
     updateVisibility();
 
     if (stateSelect.value) {
-        loadCommunesByState(stateSelect.value, communeSelect.value).then(() => {
+        loadCommunesByState(stateSelect.value, currentCommuneId).then(() => {
             updateVisibility();
             syncCityZipFromCommune();
         });
