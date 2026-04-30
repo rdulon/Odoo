@@ -13,12 +13,14 @@ function initStarkenForm() {
         return;
     }
 
-    const communeWrapper = communeSelect.closest('.form-group');
-    const cityWrapper = cityInput ? cityInput.closest('.form-group') : null;
-    const zipWrapper = zipInput ? zipInput.closest('.form-group') : null;
+    const communeWrapper = communeSelect.closest('.mb-3, .form-group, div');
+    const cityWrapper = cityInput ? cityInput.closest('.mb-3, .form-group, div') : null;
+    const zipWrapper = zipInput ? zipInput.closest('.mb-3, .form-group, div') : null;
 
     function isChile() {
-        return countrySelect.options[countrySelect.selectedIndex]?.text.includes("Chile");
+        const selectedOption = countrySelect.options[countrySelect.selectedIndex];
+        const countryText = selectedOption ? selectedOption.textContent.trim().toLowerCase() : "";
+        return countryText.includes("chile");
     }
 
     function toggleFieldsByCountry() {
@@ -78,6 +80,10 @@ function initStarkenForm() {
     // País → comportamiento
     countrySelect.addEventListener("change", () => {
         toggleFieldsByCountry();
+
+        if (!isChile()) {
+            communeSelect.value = "";
+        }
     });
 
     // Init
