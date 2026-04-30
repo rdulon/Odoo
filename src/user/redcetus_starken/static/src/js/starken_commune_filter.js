@@ -2,6 +2,9 @@
 
 import { rpc } from "@web/core/network/rpc";
 
+let isLoadingCommunes = false;
+let observerTimer = null;
+
 function isChile(countrySelect) {
     const selected = countrySelect.options[countrySelect.selectedIndex];
     const text = selected ? selected.textContent.toLowerCase() : "";
@@ -15,7 +18,6 @@ function getWrapper(el) {
 
 function applyVisibility() {
     const countrySelect = document.querySelector('select[name="country_id"]');
-    const stateSelect = document.querySelector('select[name="state_id"]');
     const communeSelect = document.querySelector('select[name="starken_commune_id"]');
     const cityInput = document.querySelector('input[name="city"]');
     const zipInput = document.querySelector('input[name="zip"]');
@@ -40,59 +42,83 @@ function applyVisibility() {
         zipWrapper.style.display = chile ? "none" : "";
     }
 
-    // limpiar comuna si no es Chile
     if (!chile) {
         communeSelect.value = "";
     }
 
-    // autocompletar city + zip
-    if (chile) {
-        const selected = communeSelect.options[communeSelect.selectedIndex];
-
-        if (selected && selected.value) {
-            if (cityInput) {
-                cityInput.value = selected.textContent;
-            }
-        }
-
-        if (zipInput && !zipInput.value) {
-            zipInput.value = "0000000";
-        }
+    if (chile && zipInput && !zipInput.value) {
+        zipInput.value = "0000000";
     }
 }
 
 async function loadCommunes(keepCurrent = false) {
+    if (isLoadingCommunes) return;
+    isLoadingCommunes = true;
+
     const stateSelect = document.querySelector('select[name="state_id"]');
     const communeSelect = document.querySelector('select[name="starken_commune_id"]');
     const countrySelect = document.querySelector('select[name="country_id"]');
 
-    if (!stateSelect || !communeSelect || !countrySelect) return;
-    if (!isChile(countrySelect)) return;
+    if (!stateSelect || !communeSelect || !countrySelect) {
+        isLoadingCommunes = false;
+        return;
+    }
+
+    if (!isChile(countrySelect)) {
+        isLoadingCommunes = false;
+        return;
+    }
 
     const stateId = stateSelect.value;
     const currentCommuneId = keepCurrent ? communeSelect.value : "";
 
     communeSelect.innerHTML = '<option value="">Seleccione comuna</option>';
 
-    if (!stateId) return;
-
-    const communes = await rpc("/starken/communes/by_state", {
-        state_id: stateId,
-    });
-
-    for (const commune of communes) {
-        const option = document.createElement("option");
-        option.value = commune.id;
-        option.textContent = commune.name;
-
-        if (currentCommuneId && String(commune.id) === String(currentCommuneId)) {
-            option.selected = true;
-        }
-
-        communeSelect.appendChild(option);
+    if (!stateId) {
+        isLoadingCommunes = false;
+        return;
     }
 
-    applyVisibility();
+    try {
+        const communes = await rpc("/starken/communes/by_state", {
+            state_id: stateId,
+        });
+
+        for (const commune of communes) {
+            const option = document.createElement("option");
+            option.value = commune.id;
+            option.textContent = commune.name;
+
+            if (currentCommuneId && String(commune.id) === String(currentCommuneId)) {
+                option.selected = true;
+            }
+
+            communeSelect.appendChild(option);
+        }
+    } finally {
+        isLoadingCommunes = false;
+        applyVisibility();
+    }
+}
+
+function syncCityZipFromCommune() {
+    const countrySelect = document.querySelector('select[name="country_id"]');
+    const communeSelect = document.querySelector('select[name="starken_commune_id"]');
+    const cityInput = document.querySelector('input[name="city"]');
+    const zipInput = document.querySelector('input[name="zip"]');
+
+    if (!countrySelect || !communeSelect || !isChile(countrySelect)) return;
+
+    const selected = communeSelect.options[communeSelect.selectedIndex];
+
+    if (selected && selected.value) {
+        if (cityInput) {
+            cityInput.value = selected.textContent;
+        }
+        if (zipInput && !zipInput.value) {
+            zipInput.value = "0000000";
+        }
+    }
 }
 
 function initEvents() {
@@ -102,7 +128,7 @@ function initEvents() {
 
     if (!countrySelect || !stateSelect || !communeSelect) return;
 
-    if (countrySelect.dataset.starkenInit) return;
+    if (countrySelect.dataset.starkenInit === "1") return;
     countrySelect.dataset.starkenInit = "1";
 
     countrySelect.addEventListener("change", () => {
@@ -115,14 +141,26 @@ function initEvents() {
     });
 
     communeSelect.addEventListener("change", () => {
+        syncCityZipFromCommune();
         applyVisibility();
+    });
+
+    communeSelect.addEventListener("focus", () => {
+        loadCommunes(true);
+    });
+
+    communeSelect.addEventListener("click", () => {
+        loadCommunes(true);
     });
 }
 
-// 🔥 CLAVE: detectar re-render de Odoo
 const observer = new MutationObserver(() => {
-    applyVisibility();
-    initEvents();
+    clearTimeout(observerTimer);
+    observerTimer = setTimeout(() => {
+        applyVisibility();
+        initEvents();
+        loadCommunes(true);
+    }, 300);
 });
 
 observer.observe(document.body, {
@@ -130,7 +168,6 @@ observer.observe(document.body, {
     subtree: true,
 });
 
-// Init inicial
 document.addEventListener("DOMContentLoaded", () => {
     applyVisibility();
     initEvents();
