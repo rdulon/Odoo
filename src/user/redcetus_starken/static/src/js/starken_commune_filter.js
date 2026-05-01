@@ -159,7 +159,6 @@ const observer = new MutationObserver(() => {
     observerTimer = setTimeout(() => {
         applyVisibility();
         initEvents();
-        loadCommunes(true);
     }, 300);
 });
 
@@ -172,4 +171,5 @@ document.addEventListener("DOMContentLoaded", () => {
     applyVisibility();
     initEvents();
     loadCommunes(true);
+    setTimeout(() => loadCommunes(true), 800);
 });
