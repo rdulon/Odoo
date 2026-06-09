@@ -162,7 +162,7 @@ class DeliveryCarrier(models.Model):
         }
 
         base_url = (
-            "https://restservices.starken.cl/starkenservices/rest"
+            "https://restservices.starken.cl/apiprd/starkenservices/rest"
             if self.starken_environment == "prod"
             else "https://restservices-qa.starken.cl/apiqa/starkenservices/rest"
         )

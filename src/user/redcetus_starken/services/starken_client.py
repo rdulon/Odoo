@@ -5,7 +5,7 @@ from odoo.exceptions import UserError
 
 class StarkenClient:
     QA_BASE_URL = "https://restservices-qa.starken.cl/apiqa/starkenservices/rest"
-    PROD_BASE_URL = "https://restservices.starken.cl/starkenservices/rest"
+    PROD_BASE_URL = "https://restservices.starken.cl/apiprd/starkenservices/rest"
 
     def __init__(self, env):
         self.env = env
