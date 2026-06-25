@@ -54,11 +54,11 @@ class StarkenCommune(models.Model):
             7: "CL-ML",
             8: "CL-BI",
             9: "CL-AR",
-            10: "CL-LR",
+            10: "CL-LL",
             11: "CL-AI",
             12: "CL-MA",
             13: "CL-RM",
-            14: "CL-LL",
+            14: "CL-LR",
             15: "CL-AP",
             16: "CL-NB",
         }
